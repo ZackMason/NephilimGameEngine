@@ -1,0 +1,47 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.db
+Build/.vs/NephilimOpenGL/v16/.suo
+Build/.vs/NephilimOpenGL/v15/.suo
+Build/*
+*.db-shm
+*.db-wal
+*.opendb
+*.ipch
+*.vcxproj
+*.filters
+*.user
+*.tlog
+*.log
+*.ilk
+*.pdb
