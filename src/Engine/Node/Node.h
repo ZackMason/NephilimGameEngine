@@ -210,7 +210,7 @@ struct Node : std::enable_shared_from_this<Node>
 			return { false, 0.0, nullptr, 0 };
 		else
 		{
-			return *std::min_element(hit_list.begin(), hit_list.end(), [](auto a, auto b) {return a.distance < b.distance; });
+			return *std::min_element(hit_list.begin(), hit_list.end(), [](const auto& a, const auto& b) {return a.distance < b.distance; });
 		}
 	}
 

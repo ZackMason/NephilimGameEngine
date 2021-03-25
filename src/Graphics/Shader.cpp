@@ -10,155 +10,38 @@
 #include <regex>	
 
 #include "Shader.h"
+#include "Engine/AssetDB.h"
 
-const std::regex r("(#include <)([a-zA-Z]+)(\.slib>)");
-
-void IncludePreprocess(std::string& code)
+Shader::Shader(const std::string& name, const std::vector<std::string>& files)
+	:
+	m_Name(name)
 {
-	std::smatch m;
-	while (std::regex_search(code, m, r))
+	m_Program = glCreateProgram();
+	
+	for (const auto& file : files)
 	{
-		std::ifstream file;
-		std::stringstream code_stream;
-		file.open("./res/SHADERS/" + (std::string)m[2] + ".slib");
-		if (file.is_open())
-		{
-			code_stream << file.rdbuf();
-			file.close();
-			std::regex file_reg("(#include <)" + (std::string)m[2] + "(\.slib>)");
-			code = std::regex_replace(code, file_reg, code_stream.str());
-		}
-		else
-			std::cout << "TRIP SHADER INCLUDE ERROR: file " << (std::string)m[2] << " not found\n";
+		auto stage = AssetDB::ResolveShaderStage(file);
+		glAttachShader(m_Program, stage->m_stage);
 	}
-}
-
-Shader::Shader(const std::string& file, bool geo)
-{
-	// 1. retrieve the vertex/fragment source code from filePath
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::string geometryCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-	std::ifstream gShaderFile;
-	// ensure ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-	std::string vertexPath   = "./res/SHADERS/" + file + ".vs";
-	std::string fragmentPath = "./res/SHADERS/" + file + ".fs";
-	std::string geometryPath = "./res/SHADERS/" + file + ".gs";
-	try
-	{
-		// open 
-		vShaderFile.open(vertexPath);
-		fShaderFile.open(fragmentPath);
-		std::stringstream vShaderStream, fShaderStream;
-		// read file's buffer contents into streams
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-		// close file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-		// convert stream into string
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-
-		if (geo)
-		{
-			gShaderFile.open(geometryPath);
-			std::cout << "openged\n";
-			std::stringstream gShaderStream;
-			gShaderStream << gShaderFile.rdbuf();
-			gShaderFile.close();
-			geometryCode = gShaderStream.str();
-		}
-
-		IncludePreprocess(vertexCode);
-		IncludePreprocess(fragmentCode);
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << file << "\n";
-	}
-
-	const char* vShaderCode = vertexCode.c_str();
-	const char* fShaderCode = fragmentCode.c_str();
-
-	int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vShaderCode, NULL);
-	glCompileShader(vertexShader);
-	// check for shader compile errors
 	int success;
 	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::" << file << "::VERTEX::COMPILATION_FAILED: " << infoLog << "\n";
-		//TRIP_LOG_ERROR("ERROR::SHADER::{}::VERTEX::COMPILATION_FAILED: {}",file, infoLog);
-	}
-	// fragment shader
-	int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
-	glCompileShader(fragmentShader);
-	// check for shader compile errors
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		//TRIP_LOG_ERROR("ERROR::SHADER::{}::FRAGMENT::COMPILATION_FAILED: {}",file, infoLog);
-		std::cout << "ERROR::SHADER::" << file << "::FRAGMENT::COMPILATION_FAILED: " << infoLog << "\n";
-	}
 
-	unsigned int geometry;
-	if (geo)
-	{
-		const char * gShaderCode = geometryCode.c_str();
-		geometry = glCreateShader(GL_GEOMETRY_SHADER);
-		glShaderSource(geometry, 1, &gShaderCode, NULL);
-		glCompileShader(geometry);
-		glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-		if (!success)
-		{
-			glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-			//TRIP_LOG_ERROR("ERROR::SHADER::{}::GEOMETERY::COMPILATION_FAILED: {}", file, infoLog);
-			std::cout << "ERROR::SHADER::" << file << "::GEOMETERY::COMPILATION_FAILED: " << infoLog << "\n";
-		}
-	}
-
-	// link shaders
-	m_Program = glCreateProgram();
-	glAttachShader(m_Program, vertexShader);
-	glAttachShader(m_Program, fragmentShader);
-	if (geo)
-		glAttachShader(m_Program, geometry);
 	glLinkProgram(m_Program);
 	// check for linking errors
 	glGetProgramiv(m_Program, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(m_Program, 512, NULL, infoLog);
 		//TRIP_LOG_ERROR("ERROR::SHADER::{}::PROGRAM::LINKING_FAILED: {}", file, infoLog);
-		std::cout << "ERROR::SHADER::" << file << "::PROGRAM::LINKING_FAILED: " << infoLog << "\n";
+		std::cout << "ERROR::SHADER::" << name << "::PROGRAM::LINKING_FAILED: " << infoLog << "\n";
 	}
 	else
 	{
-		std::cout << "LOADED SHADER : " << file << "\n";
+		std::cout << "LOADED SHADER : " << name << "\n";
 	}
-	m_frag = fragmentShader;
-	m_vert = vertexShader;
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	if (geo)
-		glDeleteShader(geometry);
 }
 
 Shader::~Shader()
 {
-	glDetachShader(m_Program, m_frag);
-	glDetachShader(m_Program, m_vert);
 	glDeleteProgram(m_Program);
 }
 

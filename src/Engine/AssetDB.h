@@ -2,6 +2,7 @@
 #include "Core.h"
 
 #include "Graphics/Shader.h"
+#include "Graphics/ShaderStage.h"
 #include "Graphics/Framebuffer.h"
 #include "Graphics/Texture2D.h"
 #include "Graphics/HDRTexture.h"
@@ -10,12 +11,14 @@
 struct AssetDB
 {
 	using ShaderCache = std::unordered_map<std::string, Ref<Shader>>;
+	using ShaderStageCache = std::unordered_map<std::string, Ref<ShaderStage>>;
 	using FramebufferCache = std::unordered_map<std::string, Ref<Framebuffer>>;
 	using Tex2DCache = std::unordered_map<std::string, Ref<Texture2D>>;
 	using HDRCache = std::unordered_map<std::string, Ref<HDRTexture>>;
 	using StaticMeshCache = std::unordered_map<std::string, Ref<StaticMesh>>;
 
 	inline static ShaderCache shader_cache;
+	inline static ShaderStageCache shader_stage_cache;
 	inline static FramebufferCache frame_cache;
 	inline static Tex2DCache tex2D_cache;
 	inline static HDRCache hdr_cache;
@@ -113,13 +116,48 @@ struct AssetDB
 		return result;
 	}
 
+	static Ref<ShaderStage> ResolveShaderStage(const std::string& shader)
+	{
+		Ref<ShaderStage> result;
+		auto itr = shader_stage_cache.find(shader);
+		if (itr == shader_stage_cache.end())
+		{
+			result = CreateRef<ShaderStage>(shader);
+			shader_stage_cache[shader] = result;
+		}
+		else
+		{
+			result = itr->second;
+		}
+
+		return result;
+	}
+
+	static Ref<Shader> BuildShader(const std::string& shader, const std::vector<std::string>& files)
+	{
+		Ref<Shader> result;
+		auto itr = shader_cache.find(shader);
+		if (itr == shader_cache.end())
+		{
+			//result = std::make_shared<Shader>(shader, files);
+			result = CreateRef<Shader>(shader, files);
+			shader_cache[shader] = result;
+		}
+		else
+		{
+			result = itr->second;
+		}
+
+		return result;
+	}
+
 	static Ref<Shader> ResolveShader(const std::string& shader)
 	{
 		Ref<Shader> result;
 		auto itr = shader_cache.find(shader);
 		if (itr == shader_cache.end())
 		{
-			result = CreateRef<Shader>(shader);
+			result = CreateRef<Shader>(shader, std::vector<std::string>{shader + ".vs", shader + ".fs"});
 			shader_cache[shader] = result;
 		}
 		else

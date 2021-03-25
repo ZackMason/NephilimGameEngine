@@ -17,6 +17,9 @@ struct Material : Bindable
 	u32 flags = NO_METALLIC_ROUGHNESS;
 
 	std::string shader;
+	std::string vertex;
+	std::string fragment;
+
 
 	void SetTransform(const m4& transform)
 	{
@@ -25,7 +28,9 @@ struct Material : Bindable
 		s->setMat4("uM", transform);
 	}
 
-	Material() = default;
+	Material()
+	{
+	}
 	virtual ~Material() = default;
 };
 
@@ -44,7 +49,11 @@ struct PBRMaterial : Material
 
 	PBRMaterial()
 	{
-		shader = "pbr"; 
+		shader = "pbr";
+		vertex = "pbr.vs";
+		fragment = "pbr.fs";
+
+		AssetDB::BuildShader(shader, { vertex, fragment });
 	}
 
 	void Bind(Graphics& gfx) override

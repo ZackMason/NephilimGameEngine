@@ -6,14 +6,15 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
+#include <vector>
 
 class Shader
 {
 public:
 	Shader() = delete;
 	~Shader();
-	Shader(const std::string& file, bool geo = false);
-  //	Shader(const std::string& file,std::function<void(void)> unifn);
+	Shader(const std::string& name) { assert(0); }
+	Shader(const std::string& name, const std::vector<std::string>& files);
 
 	operator int() { return m_Program; }
 
@@ -24,29 +25,25 @@ public:
 
 	mutable std::unordered_map<std::string, GLint> m_uniform_location_cache;
 
-  //	std::function<void(void)> m_BindUniFunctor;
-	
+	std::string m_Name;
 	int m_Program;
-	int m_frag;
-	int m_vert;
 
 	// utility uniform functions
     // --------------------------------------------------------------------------
-
     void setUniformBlock(const std::string &name, int loc) const;
-	void setBool  (const std::string &name, bool  value) const					;
-	void setInt(const std::string& name, int   value) const;
-	void setUint   (const std::string &name, unsigned int   value) const				        ;
-	void setFloat (const std::string &name, float value) const					;
-	void setVec2  (const std::string &name, float x, float y) const				;
-	void setVec3  (const std::string &name, float x, float y, float z) const	;
-	void setVec4  (const std::string &name, float x, float y, float z, float w)	;
-	void setVec2  (const std::string &name, const glm::vec2 &value) const		;
-	void setVec3  (const std::string &name, const glm::vec3 &value) const		;
-	void setVec4  (const std::string &name, const glm::vec4 &value) const		;
-	void setMat2  (const std::string &name, const glm::mat2 &mat) const			;
-	void setMat3  (const std::string &name, const glm::mat3 &mat) const			;
-	void setMat4  (const std::string &name, const glm::mat4 &mat) const			;
+	void setBool  (const std::string &name, bool  value) const;
+	void setInt   (const std::string& name, int   value) const;
+	void setUint  (const std::string &name, unsigned int   value) const;
+	void setFloat (const std::string &name, float value) const;
+	void setVec2  (const std::string &name, float x, float y) const;
+	void setVec3  (const std::string &name, float x, float y, float z) const;
+	void setVec4  (const std::string &name, float x, float y, float z, float w);
+	void setVec2  (const std::string &name, const glm::vec2 &value) const;
+	void setVec3  (const std::string &name, const glm::vec3 &value) const;
+	void setVec4  (const std::string &name, const glm::vec4 &value) const;
+	void setMat2  (const std::string &name, const glm::mat2 &mat) const;
+	void setMat3  (const std::string &name, const glm::mat3 &mat) const;
+	void setMat4  (const std::string &name, const glm::mat4 &mat) const;
 	// --------------------------------------------------------------------------
 };
 

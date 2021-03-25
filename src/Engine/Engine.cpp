@@ -143,7 +143,7 @@ void Engine::Run()
 	scene_root->AddChild(cn);
 
 	Screen screen;
-	Ref<Shader> scr_shader = AssetDB::ResolveShader("screen");
+	Ref<Shader> scr_shader = AssetDB::BuildShader("screen", {"screen.vs", "screen.fs"});
 
 	StaticMeshNode* mesh_node = new StaticMeshNode();
 	mesh_node->name = "Cerberus";
@@ -183,10 +183,9 @@ void Engine::Run()
 	scene_root->AddChild(torus);
 
 
-	AssetDB::ResolveShader("pbr");
-	AssetDB::ResolveShader("widget");
-	AssetDB::ResolveShader("skycube");
-	AssetDB::ResolveShader("iblFilter");
+	AssetDB::BuildShader("pbr", {"pbr.vs", "pbr.fs" });
+	AssetDB::BuildShader("skycube", { "skycube.vs", "skycube.fs" });
+	AssetDB::BuildShader("iblFilter", { "iblFilter.vs", "iblFilter.fs" });
 	AssetDB::SetShadersUniformBlock("uCamera", 1);
 
 	std::string envir = "Etnies_Park_Center_3k.hdr";// "Tokyo_BigSight_3k.hdr";

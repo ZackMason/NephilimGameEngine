@@ -192,9 +192,8 @@ struct CameraNode : Node3D
 		{
 			hit_list.push_back(hit_data);
 		}
-		else
 		{
-			return Node::IntersectRay(ray);
+			return Node::IntersectRay(ray, hit_list);
 		}
 	}
 
