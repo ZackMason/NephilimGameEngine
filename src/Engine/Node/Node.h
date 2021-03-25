@@ -194,19 +194,24 @@ struct Node : std::enable_shared_from_this<Node>
 
 	virtual void Edit(Editor& editor);
 
-	virtual IntersectData IntersectRay(const Ray& ray)
+	virtual IntersectData IntersectRay(const Ray& ray, std::vector<IntersectData>& hit_list = std::vector<IntersectData>{})
 	{
 		//if (is_class("StaticMeshNode") == false)
 		{
 			for (const auto& [k, child] : children)
 			{
-				if (auto hit_data = child->IntersectRay(ray); hit_data.intersect)
+				if (auto hit_data = child->IntersectRay(ray, hit_list); hit_data.intersect)
 				{
-					return hit_data;
+					hit_list.push_back(hit_data);
 				}
 			}
 		}
-		return { false, 0.0, nullptr, 0 };
+		if (hit_list.empty())
+			return { false, 0.0, nullptr, 0 };
+		else
+		{
+			return *std::min_element(hit_list.begin(), hit_list.end(), [](auto a, auto b) {return a.distance < b.distance; });
+		}
 	}
 
 	Node() {};

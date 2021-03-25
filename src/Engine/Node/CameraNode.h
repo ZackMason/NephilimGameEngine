@@ -186,11 +186,11 @@ struct CameraNode : Node3D
 		camera.LookAt(target);
 	}
 
-	IntersectData IntersectRay(const Ray& ray) override
+	IntersectData IntersectRay(const Ray& ray, std::vector<IntersectData>& hit_list = std::vector<IntersectData>{}) override
 	{
 		if (auto hit_data = Transform(glm::inverse(camera.view)).xform(bounding_box).IntersectRay(ray, this); !active && hit_data.intersect)
 		{
-			return hit_data;
+			hit_list.push_back(hit_data);
 		}
 		else
 		{
